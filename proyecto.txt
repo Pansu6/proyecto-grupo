@@ -1,0 +1,4 @@
+1. html y Css con flex para dividir la pantalla en dos, un lado codigo de color otro lado varias(4) cajas de color.
+2. Generar aleatoriamente el color base y los otros cuatro.
+3. Uno de los 4 colores tiene que ser igual al color base, deberia ser una assignacion aleatoria.
+
