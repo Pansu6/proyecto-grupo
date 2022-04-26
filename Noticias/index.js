@@ -1,66 +1,32 @@
 const bodyParser = require("body-parser");
 const express = require("express");
-const app = express();
+const mysql = require('mysql');
 
+const con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "1234",
+    database : 'noticias'
+});
+
+const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const listNews = async (req, res) => {
-  const { from_date, to_date } = req.query;
-  const connection = await db.getConnection();
+app.get('/noticias', (request, response) => {
+  con.query('SELECT * FROM articles', (error, result) => {
+      if (error) throw error;
+      response.send(result);
+  });
+});
 
-  let sql = "select id, title, date, category from articles";
-  let filters = [];
+app.get('/usuarios', (request, response) => {
+  con.query('SELECT * FROM users', (error, result) => {
+      if (error) throw error;
+      response.send(result);
+  });
+});
 
-  if (from_date) {
-    filters.push(`date >= ${from_date}`);
-  }
-  if (to_date) {
-    filters.push(`date <= ${to_date}`);
-  }
-  if (filters.length !== 0) {
-    sql = `${sql} where ${filters.join(" and ")}`;
-  }
-  const listOfNews = await connection.query(sql);
 
-  let filteredNews = listOfNews;
-  res.send(filteredNews);
-};
+app.listen(4000 , () => console.log("127.0.0.1:4000"));
 
-app.get("/noticias", listNews);
-
-const publishNewArticle = async (req, res) => {
-  const { titulo, entradilla, textoNoticia, tema, userId } = req.body;
-
-  if (!titulo || !entradilla || !textoNoticia || !tema || !userId) {
-    res.sendStatus(400);
-    return;
-  }
-
-  // TODO: comprobar que la categoria es alguna de las permitidas
-  const connection = await db.getConnection();
-
-  try {
-    await createArticle(
-      titulo,
-      entradilla,
-      textoNoticia,
-      tema,
-
-      userId,
-      connection
-    );
-  } catch (e) {
-    res.sendStatus(500);
-    connection.release();
-    return;
-  }
-
-  connection.release();
-
-  res.sendStatus(200);
-};
-
-app.post("/publicar", publishNewArticle);
-
-app.listen(4000);
