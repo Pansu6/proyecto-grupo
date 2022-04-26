@@ -41,7 +41,7 @@ const publishNewArticle = async (req, res) => {
   const connection = await db.getConnection();
 
   try {
-    await createProduct(
+    await createArticle(
       titulo,
       entradilla,
       textoNoticia,
