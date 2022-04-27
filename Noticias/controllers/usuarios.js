@@ -1,39 +1,36 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const con = require("./data/conexion.js");
+const con = require("../data/conexion");
 
 const login = async (req, res) => {
-  const { usuario, password } = req.body;
+  const { usuario, pass } = req.body;
 
-  if (!usuario || !password) {
+  if (!usuario || !pass) {
     res.sendStatus(400);
     return;
   }
 
   const sqlGetUser = `select * from usuarios where usuario="${usuario}"`; //punto 4
 
-  const usuarios = await con.query(sqlGetUser);
+  const usuarios = con.query(sqlGetUser);
 
   if (usuarios[0].length === 0) {
     res.sendStatus(403);
-    connection.release();
+    con.release();
     return;
   }
 
   if (usuarios[0][0].active === 0) {
     res.sendStatus(403);
-    connection.release();
+    con.release();
     return;
   }
 
-  const passwordsIguales = await bcrypt.compare(
-    password,
-    usuarios[0][0].password
-  );
+  const passIguales = await bcrypt.compare(pass, usuarios[0][0].password);
 
-  if (!passwordsIguales) {
+  if (!passIguales) {
     res.sendStatus(403);
-    connection.release();
+    con.release();
     return;
   }
 
@@ -44,7 +41,7 @@ const login = async (req, res) => {
   var token = jwt.sign(infoUsuario, process.env.SECRET, {
     expiresIn: "30d",
   });
-  connection.release();
+  con.release();
 
   res.send({
     data: token,
@@ -60,8 +57,6 @@ const registroUsuario = async (request, response) => {
   });
   response.send("ok");
 };
-
-const loginUsuario = (request, response) => {};
 
 module.exports = {
   login,

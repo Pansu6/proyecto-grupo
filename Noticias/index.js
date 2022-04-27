@@ -7,45 +7,16 @@ const app = express();
 
 const { login, registroUsuario } = require("./controllers/usuarios");
 
-const { crearArticulo, noticiasFecha } = require("./controllers/noticias");
+const {
+  crearArticulo,
+  noticiasFecha,
+  consultaNoticiasTema,
+  consultaNuevasNoticias,
+  consultaNoticias,
+} = require("./controllers/noticias");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-const tiempoTranscurrido = Date.now();
-const hoy = new Date(tiempoTranscurrido);
-const fechaHoy = hoy.toISOString().split("T")[0]; //dia de hoy en formato SQL
-
-const consultaNoticias = async (request, response) => {
-  //INICIO
-  con.query(`select * from noticias order by fecha desc`, (error, result) => {
-    if (error) throw error;
-    response.send(result);
-  });
-};
-
-const consultaNuevasNoticias = async (request, response) => {
-  //PUNTO 1
-  con.query(
-    `select * from noticias where fecha = "${fechaHoy}" order by positivo desc`,
-    (error, result) => {
-      if (error) throw error;
-      response.send(result);
-    }
-  );
-};
-
-const consultaNoticiasTema = async (request, response) => {
-  //PUNTO 3
-  const temaNoticia = request.params.tema; //filtro en el body
-  con.query(
-    `select * from noticias where tema = "${temaNoticia}" order by fecha desc`,
-    (error, result) => {
-      if (error) throw error;
-      response.send(result);
-    }
-  );
-};
 
 app.get("/", consultaNoticias);
 
