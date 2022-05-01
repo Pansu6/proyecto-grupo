@@ -1,10 +1,12 @@
-const con = require("./data/conexion");
+require("dotenv").config();
+
+const { getConnection } = require("./conexion.js");
 
 let conexion;
 
 async function main() {
   try {
-    conexion = await con();
+    conexion = await getConnection();
 
     await conexion.query("DROP TABLE IF EXISTS noticias");
     await conexion.query("DROP TABLE IF EXISTS usuarios");
@@ -16,7 +18,7 @@ async function main() {
         email varchar(32) unique,
         bio varchar(128),
         foto varchar(32),
-        pass varchar(128) not null);
+        password varchar(128) not null);
     `);
 
     await conexion.query(`
@@ -40,8 +42,6 @@ async function main() {
       insert into usuarios values("javi", "javi@mail.es", "Moito", "javi.jpg", "1234");
       insert into usuarios values("joan", "joan@mail.es", "Pansu", "joan.jpg", "1234");
     `);
-
-    // Meter datos de prueba en las tablas
   } catch (error) {
     console.error(error);
   } finally {
