@@ -12,7 +12,7 @@ const {
   consultaNoticiasFecha,
   consultaNoticiasTema,
   crearArticulo,
-  deleteProduct,
+  borrarNoticia,
 } = require("./controllers/noticias");
 
 app.use(bodyParser.json());
@@ -33,6 +33,6 @@ app.post("/login", login);
 
 app.post("/noticias/articuloNuevo", crearArticulo);
 
-app.delete("/noticias/:id", deleteProduct);
+app.delete("/noticias/:id", borrarNoticia);
 
 app.listen(4000, () => console.log("127.0.0.1:4000"));

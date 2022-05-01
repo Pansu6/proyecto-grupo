@@ -70,18 +70,18 @@ const crearArticulo = async (
   }
 };
 
-const deleteProduct = async (req, res) => {
+const borrarNoticia = async (req, res) => {
   const connection = await db.getConnection();
 
-  await removeProduct(req.params.id, connection);
+  await quitarNoticia(req.params.id, connection);
 
   connection.release();
 
   // delete from Product where id=2
   res.sendStatus(200);
 };
-const removeProduct = async (id, connection) => {
-  let sql = `delete from products where id=${id}`;
+const quitarNoticia = async (id, connection) => {
+  let sql = `delete from noticias where id=${id}`;
 
   await connection.query(sql);
 };
@@ -92,5 +92,5 @@ module.exports = {
   consultaNoticiasFecha,
   consultaNoticiasTema,
   crearArticulo,
-  deleteProduct,
+  borrarNoticia,
 };
