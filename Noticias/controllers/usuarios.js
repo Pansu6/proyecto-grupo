@@ -1,3 +1,4 @@
+require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const conexion = require("../conexion.js");
@@ -29,10 +30,7 @@ const login = async (req, res) => {
     return;
   }
 
-  const passwordsIguales = await bcrypt.compare(
-    pass,
-    usuarios[0][0].pass
-  );
+  const passwordsIguales = await bcrypt.compare(pass, usuarios[0][0].pass);
 
   if (!passwordsIguales) {
     res.sendStatus(403);
@@ -57,17 +55,19 @@ const login = async (req, res) => {
 
 const registroUsuario = async (request, response) => {
   //post (user, pass) en el body
-  const {nombre, pass} = request.body;
+  const { nombre, pass } = request.body;
   if (!nombre || !pass) {
     response.sendStatus(400); //si faltan parametros Error 400
     return;
   }
 
-  const conectado = await conexion.getConnection(); //conexion 
+  const conectado = await conexion.getConnection(); //conexion
   const usuario = await conectado.query(
-    `select * from usuarios where nombre="${nombre}"`);
+    `select * from usuarios where nombre="${nombre}"`
+  );
 
-  if(usuario[0].length !==0){ //si ya existe manda Conflict 409
+  if (usuario[0].length !== 0) {
+    //si ya existe manda Conflict 409
     response.sendStatus(409);
     conectado.release(); //libera conexion
     return;
@@ -75,13 +75,41 @@ const registroUsuario = async (request, response) => {
 
   const hash = await bcrypt.hash(pass, 10); //encriptacion de datos
   await conectado.query(
-    `Insert into usuarios values (null, "${nombre}", null, null, null, "${hash}")`);
+    `Insert into usuarios values (null, "${nombre}", null, null, null, "${hash}")`
+  );
 
-  conectado.release();  
+  conectado.release();
   response.send(`Usuario ${nombre} registrado`);
+};
+
+const isAuthenticated = async (req, res, next) => {
+  const token = req.headers.authorization;
+
+  try {
+    const userInfo = jwt.verify(token, process.env.SECRET);
+    req.appInfo = {
+      id: userInfo.id,
+    };
+
+    const sqlGetUser = `select * from users where id="${userInfo.id}" and insession=true`;
+
+    const users = await conexion.query(sqlGetUser);
+
+    if (users[0].length === 0) {
+      res.sendStatus(403);
+      conexion.release();
+      return;
+    }
+
+    next();
+  } catch {
+    console.log("[isAuthenticated] Error verificando token");
+    res.sendStatus(401);
+  }
 };
 
 module.exports = {
   login,
   registroUsuario,
+  isAuthenticated,
 };

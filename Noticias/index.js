@@ -5,21 +5,24 @@ const express = require("express");
 
 const app = express();
 
-const { 
+const {
   login,
-  registroUsuario } = require("./controllers/usuarios");
+  registroUsuario,
+  isAuthenticated,
+} = require("./controllers/usuarios");
 
-const { 
+const {
   consultaNoticias,
   consultaNuevasNoticias,
   noticiaTema,
-  consultaFecha
-  //crearArticulo
-   } = require("./controllers/noticias");
+  consultaFecha,
+  crearArticulo,
+  borrarNoticia,
+} = require("./controllers/noticias");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 app.get("/", consultaNoticias);
 
@@ -33,6 +36,8 @@ app.post("/registro", registroUsuario);
 
 app.post("/login", login);
 
-app.post("/noticias/articuloNuevo", crearArticulo);
+app.post("/noticias/articuloNuevo", isAuthenticated, crearArticulo);
+
+app.delete("/noticias/borrar", isAuthenticated, borrarNoticia);
 
 app.listen(4000, () => console.log("127.0.0.1:4000"));
