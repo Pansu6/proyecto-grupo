@@ -5,39 +5,61 @@ const express = require("express");
 
 const app = express();
 
-const {
+const { 
   login,
-  registroUsuario,
-  isAuthenticated,
+  registrarUsuario,
+  editarUsuario
 } = require("./controllers/usuarios");
 
-const {
+const { 
   consultaNoticias,
   consultaNuevasNoticias,
   noticiaTema,
   consultaFecha,
-  crearArticulo,
+  noticiaNueva,
+  editarNoticia,
   borrarNoticia,
-} = require("./controllers/noticias");
+  votarNoticia
+  } = require("./controllers/noticias");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public"));
+app.use(express.static('public'));
+
+const estaLogueado = (req, res, next) => {
+  const token = req.headers.authorization;
+  const jwt = require("jsonwebtoken");
+
+  try{
+    const infoUsuario = jwt.verify(token, process.env.SECRET);
+    next();
+  }
+  catch{
+    console.log("Error verificacion");
+    res.sendStatus(401);
+  }
+}
 
 app.get("/", consultaNoticias);
 
 app.get("/noticiasdeldia", consultaNuevasNoticias);
 
-app.get("/noticias/:tema", noticiaTema);
+app.get("/noticiastema/:tema", noticiaTema);
 
-app.get("/:fecha", consultaFecha);
+app.get("/noticiasfecha/:fecha", consultaFecha);
 
-app.post("/registro", registroUsuario);
+app.post("/registro", registrarUsuario);
 
 app.post("/login", login);
 
-app.post("/noticias/articuloNuevo", isAuthenticated, crearArticulo);
+app.post("/noticianueva", estaLogueado, noticiaNueva);
 
-app.delete("/noticias/borrar", isAuthenticated, borrarNoticia);
+app.post("/editarnoticia", estaLogueado, editarNoticia);
+
+app.post("/borrarnoticia", estaLogueado, borrarNoticia);
+
+app.post("/votarnoticia", estaLogueado, votarNoticia);
+
+app.post("/editarusuario", estaLogueado, editarUsuario);
 
 app.listen(4000, () => console.log("127.0.0.1:4000"));
