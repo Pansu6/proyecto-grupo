@@ -3,33 +3,33 @@ const jwt = require("jsonwebtoken");
 const conexion = require("../conexion.js");
 
 const login = async (req, res) => {
-  const { usuario, password } = req.body;
+  const { nombre, pass } = req.body;
 
-  if (!usuario || !password) {
+  if (!nombre || !pass) { //comprueba parametros body
     res.sendStatus(400);
     return;
   }
 
-  const sqlGetUser = `select * from usuarios where nombre="${usuario}"`; //punto 4
+  const sqlGetUser = `select * from usuarios where nombre="${nombre}"`; //usuario existe
   const conectado = await conexion.getConnection();
   const usuarios = await conectado.query(sqlGetUser);
 
-  if (usuarios[0].length === 0) {
+  if (usuarios[0].length === 0) {//usurio existe
     res.sendStatus(403);
-    conexion.release();
+    conectado.release();
     return;
   }
 
-  if (usuarios[0][0].active === 0) {
+  if (usuarios[0][0].active === 0) {//usuario logueado
     res.sendStatus(403);
-    conexion.release();
+    conectado.release();
     return;
   }
 
   const passwordsIguales = await bcrypt.compare(
-    password,
+    pass,
     usuarios[0][0].pass
-  );
+  );//compara pass
 
   if (!passwordsIguales) {
     res.sendStatus(403);
@@ -44,11 +44,11 @@ const login = async (req, res) => {
 
   var token = jwt.sign(infoUsuario, process.env.SECRET, {
     expiresIn: "30d",
-  });
+  });//token generado
 
   res.send({
     data: token,
-  });
+  });//envio token
 };
 
 const registrarUsuario = async (request, response) => {

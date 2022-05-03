@@ -1,17 +1,23 @@
 require("dotenv").config();
-
+const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const express = require("express");
 
 const app = express();
 
 const { 
+  crearBD
+} = require("./inicia");
+
+crearBD(); //script para crear base de datos
+
+const { //funcionalidades usuarios
   login,
   registrarUsuario,
   editarUsuario
 } = require("./controllers/usuarios");
 
-const { 
+const { //funcionalidades noticias
   consultaNoticias,
   consultaNuevasNoticias,
   noticiaTema,
@@ -20,15 +26,14 @@ const {
   editarNoticia,
   borrarNoticia,
   votarNoticia
-  } = require("./controllers/noticias");
+} = require("./controllers/noticias");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-const estaLogueado = (req, res, next) => {
+const estaLogueado = (req, res, next) => { //comprueba si esta logueado
   const token = req.headers.authorization;
-  const jwt = require("jsonwebtoken");
 
   try{
     const infoUsuario = jwt.verify(token, process.env.SECRET);

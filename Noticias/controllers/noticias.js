@@ -9,44 +9,47 @@ const consultaNoticias = async (request, response) => {
   //INICIO
   const conectado = await conexion.getConnection();
   const listaNoticias = await conectado.query(`select * from noticias order by fecha desc;`);
-  //conectado.release();
+  conectado.release();
   response.send(listaNoticias[0]);
 };
 
-const consultaNuevasNoticias = async (request, response) => {
-  //PUNTO 1
+const consultaNuevasNoticias = async (request, response) => {//consulta por fecha de hoy
   const conectado = await conexion.getConnection();
-  const listaNoticias = await conectado.query(`select * from noticias where fecha = "${fechaHoy}" order by fecha desc;`);
-  //conectado.release();
+  const listaNoticias = await conectado.query(`select * from noticias where fecha = "${fechaHoy}" order by positivo desc;`);
+  conectado.release();
   response.send(listaNoticias[0]);
 };
 
-const noticiaTema = async (request, response) => {
-  //PUNTO 3
+const noticiaTema = async (request, response) => {//consulta por tema
   const temaNoticia = request.params.tema; //filtro en el body
+  if(!temaNoticia){//comprueba parametros
+    response.sendStatus(400);
+    return
+  }
   const conectado = await conexion.getConnection();
-  
   const listaNoticias = await conectado.query(`select * from noticias where tema = "${temaNoticia}";`);
   conectado.release();
   response.send(listaNoticias[0]);
 };
-const consultaFecha = async (request, response) => {
-  //PUNTO 2
+const consultaFecha = async (request, response) => {//consulta por fecha
   const fechaNoticia = request.params.fecha;
+  if(!fechaNoticia){//comprueba parametros
+    response.sendStatus(400);
+    return
+  }
   const conectado = await conexion.getConnection();
   const listaNoticias = await conectado.query(`select * from noticias where fecha = "${fechaNoticia}";`);
   conectado.release();
   response.send(listaNoticias[0]);
 };
 
-const noticiaNueva = async (request, response) => {
+const noticiaNueva = async (request, response) => {//agregar noticia
   const {titulo, foto, entradilla, texto, tema} = request.body;
   const token = request.headers.authorization;
   const infoUsuario = jwt.decode(token, process.env.SECRET);
 
-  if(!titulo || !entradilla || !texto || !tema){
+  if(!titulo || !entradilla || !texto || !tema){//comprueba parametros
     response.sendStatus(400);
-    console.log("hola");
     return
   }
   const conectado = await conexion.getConnection(); //conexion 
@@ -60,11 +63,11 @@ const noticiaNueva = async (request, response) => {
   //insercion sql
   conectado.query(`insert into noticias values (null, "${titulo}", "${fechaHoy}", "${foto}", "${entradilla}", "${texto}", "${tema}", 0, 0, 0, "${infoUsuario.id}");`);
   conectado.release();
-  response.sendStatus(200);
+  response.send(`Noticia "${id}" creada`);
 };
 
 
-const editarNoticia = async (request, response) => {
+const editarNoticia = async (request, response) => {//edicion de noticias
   let {id, titulo, foto, entradilla, texto, tema} = request.body;
 
   if(id.length ===0){ //si no existe 
@@ -111,10 +114,10 @@ const editarNoticia = async (request, response) => {
   set titulo = "${titulo}", fecha = "${fechaHoy}", foto = "${foto}", entradilla = "${entradilla}", texto = "${texto}", tema = "${tema}", positivo = 0, negativo = 0, editado= 1
   where id = "${id}";`);
   conectado.release();
-  response.sendStatus(200);
+  response.send(`Noticia "${id}" editada`);
 }
 
-const borrarNoticia = async (request, response) => {
+const borrarNoticia = async (request, response) => {//borrar noticia
   let {id} = request.body;
   if(id.length ===0){ //si no existe 
     response.sendStatus(400);
@@ -126,7 +129,7 @@ const borrarNoticia = async (request, response) => {
 
   const conectado = await conexion.getConnection(); //conexion 
   const noticia = await conectado.query(`select * from noticias where id="${id}"`);
-  console.log(noticia[0]);
+
   if(noticia[0].length ===0){ //si no existe manda Conflict 409
     response.sendStatus(409);
     conectado.release(); //libera conexion
@@ -140,10 +143,10 @@ const borrarNoticia = async (request, response) => {
 
   conectado.query(`delete from noticias where id = "${id}";`);
   conectado.release();
-  response.sendStatus(200);
+  response.send(`Noticia "${id}" borrada`);
 }
 
-const votarNoticia = async (request, response) => {
+const votarNoticia = async (request, response) => {//voto de noticias
   let {id, pos, neg} = request.body;
   if(id.length ===0){ //si no existe 
     response.sendStatus(400);
@@ -151,13 +154,13 @@ const votarNoticia = async (request, response) => {
   }
   const conectado = await conexion.getConnection(); //conexion 
   const noticia = await conectado.query(`select * from noticias where id="${id}"`);
-  console.log(noticia[0]);
+
   if(noticia[0].length ===0){ //si no existe manda Conflict 409
     response.sendStatus(409);
     conectado.release(); //libera conexion
     return;
   }
-
+//si faltan parametros recoge 0
   if(pos.length===0 || pos === 0){
     pos = noticia[0][0].positivo;
   }
@@ -173,7 +176,7 @@ const votarNoticia = async (request, response) => {
 
   conectado.query(`update noticias set positivo = "${pos}", negativo = "${neg}" where id = "${id}";`);
   conectado.release();
-  response.sendStatus(200);
+  response.send(`Noticia "${id}" votada`);
 }
 
 
