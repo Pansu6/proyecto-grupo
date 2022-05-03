@@ -1,6 +1,11 @@
 const mysql = require('mysql2/promise');
 require("dotenv").config();
 
+const { 
+    crearBD
+  } = require("./inicia");
+  
+crearBD(); //script para crear base de datos
 
 const {MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE} = process.env;
 

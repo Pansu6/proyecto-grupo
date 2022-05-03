@@ -1,14 +1,25 @@
-const conexion = require("./conexion.js");
+var mysql = require('mysql');
+require("dotenv").config();
+const {MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD} = process.env;
+
+//crea bd exista o no 
 
 async function crearBD() {
-  const conectado = await conexion.getConnection();
+  var conectado = mysql.createConnection({
+    host: MYSQL_HOST,
+    user: MYSQL_USER,
+    password: MYSQL_PASSWORD
+  });conectado.connect(function(err) {
+    if (err) throw err;
+  });
   try {
+    await conectado.query("CREATE DATABASE IF NOT EXISTS Noticias;");
+    await conectado.query("USE noticias;");
     await conectado.query("DROP TABLE IF EXISTS noticias;");
     await conectado.query("DROP TABLE IF EXISTS usuarios;");
     await conectado.query("DROP DATABASE IF EXISTS Noticias;");
     await conectado.query("CREATE DATABASE Noticias;");
-    await conectado.query("USE Noticias;");
-
+    await conectado.query("USE noticias;");
     await conectado.query(`
     CREATE table Usuarios(
         id int auto_increment primary key,
@@ -18,7 +29,6 @@ async function crearBD() {
         foto varchar(32),
         pass varchar(128) not null);
     `);
-
     await conectado.query(`
     CREATE table Noticias(
         id int auto_increment,
@@ -37,8 +47,6 @@ async function crearBD() {
     `);
   } catch (error) {
     console.error(error);
-  } finally {
-    if (conectado) conectado.release();
   }
 }
 

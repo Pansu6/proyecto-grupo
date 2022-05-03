@@ -5,12 +5,6 @@ const express = require("express");
 
 const app = express();
 
-const { 
-  crearBD
-} = require("./inicia");
-
-crearBD(); //script para crear base de datos
-
 const { //funcionalidades usuarios
   login,
   registrarUsuario,
