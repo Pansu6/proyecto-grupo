@@ -1,5 +1,5 @@
 # proyecto-grupo
-<p>Dentro del directorio /proyecto-grupo-main ejecutar node index.js => 127.0.0.1:4000</p>
+<p>Dentro del directorio /proyecto-grupo-main/Noticias ejecutar node index.js</p>
 <p></p>
 <p>El fichero .env contiene las claves para conectarse a la base de datos. Se requiere que lo rellene el usuario.</p>
 <p>Ejemplo:</p>
