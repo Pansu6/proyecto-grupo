@@ -108,7 +108,7 @@ const editarUsuario = async (request, response) => {
   }
   //si falta algun parametro recupera el anterior valor 
   if(nombre.length === 0){
-    nombre = usuario[0][0].bombre;
+    nombre = usuario[0][0].nombre;
   }
   if(email.length === 0){
     email = usuario[0][0].email;
@@ -128,7 +128,7 @@ const editarUsuario = async (request, response) => {
   set nombre = "${nombre}", email = "${email}", bio = "${bio}", foto = "${foto}", pass = "${hash}"
   where id = "${id}";`);
   conectado.release();
-  response.sendStatus(200);
+  response.send(`Usuario "${nombre}" editado`);
 };
 
 

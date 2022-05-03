@@ -63,7 +63,7 @@ const noticiaNueva = async (request, response) => {//agregar noticia
   //insercion sql
   conectado.query(`insert into noticias values (null, "${titulo}", "${fechaHoy}", "${foto}", "${entradilla}", "${texto}", "${tema}", 0, 0, 0, "${infoUsuario.id}");`);
   conectado.release();
-  response.send(`Noticia "${id}" creada`);
+  response.send(`Noticia de "${tema}" creada`);
 };
 
 
@@ -161,13 +161,13 @@ const votarNoticia = async (request, response) => {//voto de noticias
     return;
   }
 //si faltan parametros recoge 0
-  if(pos.length===0 || pos === 0){
+  if(pos.length===0 || pos == 0){
     pos = noticia[0][0].positivo;
   }
   else{
     pos = 1 + noticia[0][0].positivo;
   }
-  if(neg.length===0 || neg === 0){
+  if(neg.length===0 || neg == 0){
     neg=noticia[0][0].negativo;
   }
   else{
